@@ -239,6 +239,26 @@ gmsh.model.occ.fragment([(3, final_front_frame_tag),(3, final_rear_frame_tag),(3
 
 
 gmsh.model.occ.synchronize()
+
+################################
+create physical groups
+################################
+# volume
+gmsh.model.add_physical_group(3, [front_glass], 1)   # front glass is marked as 1 
+gmsh.model.add_physical_group(3, [front_encap], 2)   # front encapsulant is marked as 2
+gmsh.model.add_physical_group(3, [cell_layer_encap_tag], 3)   #  encapsulant in cell layer (around the cells) is marked as 3
+
+cell_tag_list = []
+for i in range(np.shape(cell_list)[0]):
+    cell_tag_list.append(cell_list[i][1])
+gmsh.model.add_physical_group(3, cell_tag_list, 4)   #  cells are marked as 4
+
+gmsh.model.add_physical_group(3, [back_encap], 5)   #  back encapsulant is marked as 5
+gmsh.model.add_physical_group(3, [back_sheet], 6)   #  backsheet is marked as 6
+gmsh.model.add_physical_group(3, [seal], 7)   #  seal volume is marked as 7
+gmsh.model.add_physical_group(3, [final_front_frame_tag, final_rear_frame_tag, final_left_frame_tag, final_right_frame_tag], 8)   #  all frame is marked as 8
+
+
 gmsh.write("panel_geo.brep")
 
 
