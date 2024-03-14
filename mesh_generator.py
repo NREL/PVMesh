@@ -111,6 +111,7 @@ rear_frame = gmsh.model.occ.extrude(frame_surface_rear, 2*frame_extended+panel_l
 rear_frame_tag = rear_frame[1][1]
 
 
+
 """
 cut the frame and remove extended parts
 """
@@ -155,26 +156,53 @@ gmsh.model.occ.translate(cut_surface_right_front,panel_length, -panel_width,0)
 cut_surface_right_front_tag = cut_surface_right_front[0][1]
 
 
-# cut and remove the extended frame
+# cut and remove the extended part of left frame
 cutted_left_frame = gmsh.model.occ.fragment([(3,left_frame_tag)],[(2,cut_surface_left_front), (2,cut_surface_left_rear)], removeTool=False)
+# remove the extended part of the frame
 gmsh.model.occ.remove([cutted_left_frame[0][0], cutted_left_frame[0][2]], recursive=True)
+# final tag of frame at left
 final_left_frame_tag = cutted_left_frame[0][1][1]
-gmsh.model.occ.remove([cutted_left_frame[0][-2],cutted_left_frame[0][-3],cutted_left_frame[0][-5],cutted_left_frame[0][-6]], recursive=True)
+# remove the cutting surface
+remove_surface_list = []
+for i in range(3,np.shape(cutted_left_frame[0])[0]):
+    remove_surface_list.append(cutted_left_frame[0][i])
+gmsh.model.occ.remove(remove_surface_list, recursive=True)
 
+# cut and remove the extended part of front frame
 cutted_front_frame = gmsh.model.occ.fragment([(3,front_frame_tag)],[(2,cut_surface_left_front), (2,cut_surface_right_front_tag)], removeTool=False)
+# remove the extended part of the frame
 gmsh.model.occ.remove([cutted_front_frame[0][0], cutted_front_frame[0][2]], recursive=True)
+# final tag of frame at front
 final_front_frame_tag = cutted_front_frame[0][1][1]
-gmsh.model.occ.remove([cutted_front_frame[0][-2],cutted_front_frame[0][-3],cutted_front_frame[0][-5],cutted_front_frame[0][-6]], recursive=True)
+# remove the cutting surface
+remove_surface_list = []
+for i in range(3,np.shape(cutted_front_frame[0])[0]):
+    remove_surface_list.append(cutted_front_frame[0][i])
+gmsh.model.occ.remove(remove_surface_list, recursive=True)
 
+# cut and remove the extended part of right frame
 cutted_right_frame = gmsh.model.occ.fragment([(3,right_frame_tag)],[(2,cut_surface_right_front_tag), (2,cut_surface_right_rear_tag)], removeTool=False)
+# remove the extended part of the frame
 gmsh.model.occ.remove([cutted_right_frame[0][0], cutted_right_frame[0][2]], recursive=True)
+# final tag of frame at right
 final_right_frame_tag = cutted_right_frame[0][1][1]
-gmsh.model.occ.remove([cutted_right_frame[0][-2],cutted_right_frame[0][-3],cutted_right_frame[0][-5],cutted_right_frame[0][-6]], recursive=True)
+# remove the cutting surface
+remove_surface_list = []
+for i in range(3,np.shape(cutted_right_frame[0])[0]):
+    remove_surface_list.append(cutted_right_frame[0][i])
+gmsh.model.occ.remove(remove_surface_list, recursive=True)
 
+# cut and remove the extended part of right frame
 cutted_rear_frame = gmsh.model.occ.fragment([(3,rear_frame_tag)],[(2,cut_surface_right_rear_tag), (2,cut_surface_left_rear)], removeTool=False)
+# remove the extended part of the frame
 gmsh.model.occ.remove([cutted_rear_frame[0][0], cutted_rear_frame[0][2]], recursive=True)
+# final tag of frame at rear
 final_rear_frame_tag = cutted_rear_frame[0][1][1]
-gmsh.model.occ.remove([cutted_rear_frame[0][-2],cutted_rear_frame[0][-3],cutted_rear_frame[0][-5],cutted_rear_frame[0][-6]], recursive=True)
+# remove the cutting surface
+remove_surface_list = []
+for i in range(3,np.shape(cutted_rear_frame[0])[0]):
+    remove_surface_list.append(cutted_rear_frame[0][i])
+gmsh.model.occ.remove(remove_surface_list, recursive=True)
 
 # remove surfaces used to cut frames
 gmsh.model.occ.remove([(2,cut_surface_right_rear_tag), (2,cut_surface_left_rear),(2,cut_surface_right_front_tag), (2,cut_surface_left_front) ], recursive=True)
@@ -240,10 +268,10 @@ gmsh.model.occ.fragment([(3, final_front_frame_tag),(3, final_rear_frame_tag),(3
 
 gmsh.model.occ.synchronize()
 
-################################
-create physical groups
-################################
-# volume
+# ################################
+# create physical groups
+# ################################
+# # volume
 gmsh.model.add_physical_group(3, [front_glass], 1)   # front glass is marked as 1 
 gmsh.model.add_physical_group(3, [front_encap], 2)   # front encapsulant is marked as 2
 gmsh.model.add_physical_group(3, [cell_layer_encap_tag], 3)   #  encapsulant in cell layer (around the cells) is marked as 3
@@ -257,6 +285,7 @@ gmsh.model.add_physical_group(3, [back_encap], 5)   #  back encapsulant is marke
 gmsh.model.add_physical_group(3, [back_sheet], 6)   #  backsheet is marked as 6
 gmsh.model.add_physical_group(3, [seal], 7)   #  seal volume is marked as 7
 gmsh.model.add_physical_group(3, [final_front_frame_tag, final_rear_frame_tag, final_left_frame_tag, final_right_frame_tag], 8)   #  all frame is marked as 8
+
 
 
 gmsh.write("panel_geo.brep")
@@ -274,4 +303,4 @@ gmsh.write("panel_geo.brep")
 # gmsh.model.mesh.generate(3)
 # gmsh.write('panel.vtk')
 
-# gmsh.finalize()
+gmsh.finalize()
