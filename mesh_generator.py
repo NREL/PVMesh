@@ -28,6 +28,71 @@ def _add_to_domain_markers(marker_name, gmsh_tags, entity_type):
         domain_markers[marker_name] = marker_dict
         domain_markers["_current_idx"] += 1
 
+def from_domain_markers_to_PhysicalName(domain_markers,ndim):
+    # set physical attributes
+    for key, data in domain_markers.items():
+                if isinstance(data, dict) and "gmsh_tags" in data:
+                    # print(key)
+                    # Cells (i.e., entities of dim = msh.topology.dim)
+                    if data["entity"] == "cell":
+                        gmsh.model.addPhysicalGroup(
+                            ndim, data["gmsh_tags"], data["idx"]
+                        )
+                        gmsh.model.setPhysicalName(ndim, data["idx"], key)
+                        print("added volume ", key)
+
+                    # Facets (i.e., entities of dim = msh.topology.dim - 1)
+                    if data["entity"] == "facet":
+                        gmsh.model.addPhysicalGroup(
+                            ndim - 1, data["gmsh_tags"], data["idx"]
+                        )
+                        gmsh.model.setPhysicalName(ndim - 1, data["idx"], key)
+
+def volume_tags(vol_list,count_volumes,structure_vol_list):
+    for vol_tag in vol_list:
+        vol_id = vol_tag[1]
+        # structure_vol_list.append("vol"+str(count_volumes))
+        # _add_to_domain_markers("vol"+str(count_volumes), [vol_id], "cell")
+        _add_to_domain_markers(structure_vol_list[count_volumes], [vol_id], "cell")
+        # print(count_volumes)
+        count_volumes+=1
+    return count_volumes, structure_vol_list
+
+def surface_tags(surf_list,count_surface,ndim):
+    for surf_tag in surf_list:
+                surf_id = surf_tag[1]
+                com = gmsh.model.occ.getCenterOfMass(ndim - 1, surf_id)
+
+                # print(com)
+                
+                _add_to_domain_markers("sur"+str(surf_id), [surf_id], "facet")
+                count_surface +=1
+    return count_surface
+
+def set_length_scale(surface_id,  lcmin, lcmax, dismin, distmax ):
+    distance = gmsh.model.mesh.field.add("Distance")
+    gmsh.model.mesh.field.setNumbers(
+        distance, "FacesList", domain_markers[surface_id]["gmsh_tags"]
+    )
+
+    threshold = gmsh.model.mesh.field.add("Threshold")
+    gmsh.model.mesh.field.setNumber(threshold, "IField", distance)
+
+    
+    # half_panel = params.pv_array.panel_chord * np.cos(params.pv_array.tracker_angle)
+    # gmsh.model.mesh.field.setNumber(threshold, "LcMin", resolution * 0.5)
+    # resolution = factor * 10 * params.pv_array.panel_thickness / 2
+    gmsh.model.mesh.field.setNumber(threshold, "LcMin", lcmin )
+
+    gmsh.model.mesh.field.setNumber(threshold, "LcMax", lcmax)
+    gmsh.model.mesh.field.setNumber(
+        threshold, "DistMin", dismin
+    )
+    gmsh.model.mesh.field.setNumber(
+        threshold, "DistMax", distmax
+    )
+
+    return threshold
 
 ##################################
 # define parameters
@@ -238,6 +303,8 @@ gmsh.model.occ.remove([(2,cut_surface_right_rear_tag), (2,cut_surface_left_rear)
 # remove interfaces between frames, all tags of frames are not changed
 gmsh.model.occ.fragment([(3, final_front_frame_tag),(3, final_rear_frame_tag)],[(3, final_left_frame_tag), (3, final_right_frame_tag)])
 
+gmsh.model.occ.synchronize()
+
 
 #               4                   
 #       ===============
@@ -255,143 +322,21 @@ count_surface = 0
 
 # # capture surfaces
 # surf_tag_list = gmsh.model.occ.getEntities(ndim - 1)
-# for surf_tag in surf_tag_list:
-#             surf_id = surf_tag[1]
-#             com = gmsh.model.occ.getCenterOfMass(ndim - 1, surf_id)
+# surf_list = surf_tag_list[count_surface:][:]
+# count_surface =  surface_tags(surf_list,count_surface,ndim)
 
-#             # print(com)
-            
-#             _add_to_domain_markers(str(count_surface), [surf_id], "facet")
-#             count_surface +=1
-# print(count_surface)
-
-# # capture volumes
-# frame_names = ["frm_left", "frm_bottom", "frm_right", "frm_top"] 
-# count_volumes=0
-
+structure_vol_list =["frm0","frm1","frm2","frm3"]
 # vol_tag_list = gmsh.model.occ.getEntities(ndim)
-# structure_vol_list = []
-# for vol_tag in vol_tag_list:
-#     vol_id = vol_tag[1]
-#     structure_vol_list.append(vol_id)
-#     _add_to_domain_markers(frame_names[count_volumes], [vol_id], "cell")
-#     count_volumes +=1
+# vol_list = vol_tag_list[count_volumes:][:]
+# count_volumes, structure_vol_list =  volume_tags(vol_list,count_volumes,structure_vol_list)
 
-# # set physical attributes
-# for key, data in domain_markers.items():
-#             if isinstance(data, dict) and "gmsh_tags" in data:
-#                 # print(key)
-#                 # Cells (i.e., entities of dim = msh.topology.dim)
-#                 if data["entity"] == "cell":
-#                     gmsh.model.addPhysicalGroup(
-#                         ndim, data["gmsh_tags"], data["idx"]
-#                     )
-#                     gmsh.model.setPhysicalName(ndim, data["idx"], key)
-
-#                 # Facets (i.e., entities of dim = msh.topology.dim - 1)
-#                 if data["entity"] == "facet":
-#                     gmsh.model.addPhysicalGroup(
-#                         ndim - 1, data["gmsh_tags"], data["idx"]
-#                     )
-#                     gmsh.model.setPhysicalName(ndim - 1, data["idx"], key)
-
-
-min_dist=[]
-
-
-# distance = gmsh.model.mesh.field.add("Distance")
-# gmsh.model.mesh.field.setNumbers(
-#     distance, "FacesList", domain_markers["5"]["gmsh_tags"]
-# )
-
-# threshold = gmsh.model.mesh.field.add("Threshold")
-# gmsh.model.mesh.field.setNumber(threshold, "IField", distance)
-
-# resolution = 0.17/100
-# # half_panel = params.pv_array.panel_chord * np.cos(params.pv_array.tracker_angle)
-# # gmsh.model.mesh.field.setNumber(threshold, "LcMin", resolution * 0.5)
-# # resolution = factor * 10 * params.pv_array.panel_thickness / 2
-# gmsh.model.mesh.field.setNumber(threshold, "LcMin", resolution )
-
-# gmsh.model.mesh.field.setNumber(threshold, "LcMax", 10 * resolution)
-# gmsh.model.mesh.field.setNumber(
-#     threshold, "DistMin", resolution
-# )
-# gmsh.model.mesh.field.setNumber(
-#     threshold, "DistMax", 3*resolution
-# )
-
-
-
-
-def set_length_scale(surface_id,  lcmin, lcmax, dismin, distmax ):
-    distance = gmsh.model.mesh.field.add("Distance")
-    gmsh.model.mesh.field.setNumbers(
-        distance, "FacesList", domain_markers[surface_id]["gmsh_tags"]
-    )
-
-    threshold = gmsh.model.mesh.field.add("Threshold")
-    gmsh.model.mesh.field.setNumber(threshold, "IField", distance)
-
-    
-    # half_panel = params.pv_array.panel_chord * np.cos(params.pv_array.tracker_angle)
-    # gmsh.model.mesh.field.setNumber(threshold, "LcMin", resolution * 0.5)
-    # resolution = factor * 10 * params.pv_array.panel_thickness / 2
-    gmsh.model.mesh.field.setNumber(threshold, "LcMin", lcmin )
-
-    gmsh.model.mesh.field.setNumber(threshold, "LcMax", lcmax)
-    gmsh.model.mesh.field.setNumber(
-        threshold, "DistMin", dismin
-    )
-    gmsh.model.mesh.field.setNumber(
-        threshold, "DistMax", distmax
-    )
-
-    return threshold
-
-
-# for i in [1,2]:
-      
-
-#     # resolution = 0.17/10
-#     # threshold = set_length_scale(str(0 + (i-1)*18),  resolution, 10*resolution, resolution, 3*resolution )
-#     # min_dist.append(threshold)
-#     # threshold = set_length_scale(str(2+ (i-1)*18),  resolution, 10*resolution, resolution, 3*resolution )
-#     # min_dist.append(threshold)
-
-
-#     resolution = 0.17/100
-#     for ids in [1,3]:
-#         threshold = set_length_scale(str(ids+ (i-1)*18),  resolution, 2*resolution, resolution, 1.5*resolution )#3
-#         min_dist.append(threshold)
-
-#     for ids in [5]:
-#         threshold = set_length_scale(str(ids+ (i-1)*18),  resolution, 2*resolution, resolution, 1.5*resolution )#10
-#         min_dist.append(threshold)
-
-    
-
-# resolution = 0.17/10
-# for ids in [0,18,36,52]:
-#     threshold = set_length_scale(str(ids),  resolution, 10*resolution, resolution, 3*resolution )
+# min_dist=[]
+# for volid in structure_vol_list:
+#     threshold = set_length_scale(volid,  frame_thick*100, frame_thick*100, 0, 0 )#3
 #     min_dist.append(threshold)
 
-# minimum = gmsh.model.mesh.field.add("Min")
-# gmsh.model.mesh.field.setNumbers(minimum, "FieldsList", min_dist)
-# gmsh.model.mesh.field.setAsBackgroundMesh(minimum)
 
-# gmsh.option.setNumber("Mesh.Algorithm", 6)
-# gmsh.option.setNumber("Mesh.Algorithm3D", 1)
-# gmsh.option.setNumber("Mesh.RecombinationAlgorithm", 0)
-
-
-# gmsh.model.mesh.generate(3)
-# gmsh.model.mesh.setOrder(1)
-# gmsh.model.mesh.optimize("Relocate3D")
-# gmsh.model.mesh.refine
 # # gmsh.model.mesh.generate(3)
-
-
 
 
 # gmsh.write("panel_geo.msh")
@@ -435,55 +380,6 @@ gmsh.model.occ.fragment([(3,front_encap)], cell_eva_frag[0], removeTool=True) # 
 gmsh.model.occ.fragment(cell_eva_frag[0], [(3,back_encap)], removeTool=True) # remove repeated interfaces, all index of involved volumes are not changed
 gmsh.model.occ.fragment([(3,back_encap)], [(3,back_sheet)], removeTool=True) # index of each layer are not changed.
 
-# gmsh.model.occ.synchronize()
-
-# # capture surfaces
-# surf_tag_list = gmsh.model.occ.getEntities(ndim - 1)
-# for surf_tag in surf_tag_list[count_surface:-1][:]:
-#             surf_id = surf_tag[1]
-#             com = gmsh.model.occ.getCenterOfMass(ndim - 1, surf_id)
-
-#             # print(com)
-            
-#             _add_to_domain_markers("sur"+str(surf_id), [surf_id], "facet")
-#             count_surface +=1
-# print(count_surface)
-
-# # capture volumes
-# # frame_names = ["frm_left", "frm_bottom", "frm_right", "frm_top"] 
-# # count_volumes=0
-
-# vol_tag_list = gmsh.model.occ.getEntities(ndim)
-# structure_vol_list = []
-# for vol_tag in vol_tag_list[count_volumes:-1][:]:
-#     vol_id = vol_tag[1]
-#     structure_vol_list.append(vol_id)
-#     _add_to_domain_markers("vol"+str(count_volumes), [vol_id], "cell")
-#     count_volumes +=1
-
-# # set physical attributes
-# for key, data in domain_markers.items():
-#             if isinstance(data, dict) and "gmsh_tags" in data:
-#                 # print(key)
-#                 # Cells (i.e., entities of dim = msh.topology.dim)
-#                 if data["entity"] == "cell":
-#                     gmsh.model.addPhysicalGroup(
-#                         ndim, data["gmsh_tags"], data["idx"]
-#                     )
-#                     gmsh.model.setPhysicalName(ndim, data["idx"], key)
-#                     print("added volume ", key)
-
-#                 # Facets (i.e., entities of dim = msh.topology.dim - 1)
-#                 if data["entity"] == "facet":
-#                     gmsh.model.addPhysicalGroup(
-#                         ndim - 1, data["gmsh_tags"], data["idx"]
-#                     )
-#                     gmsh.model.setPhysicalName(ndim - 1, data["idx"], key)
-
-# gmsh.model.mesh.generate(3)
-# gmsh.write("panel_geo.msh")
-# gmsh.write("panel_geo.vtk")
-
 
 #########################################
 # create seal layer geometry
@@ -503,247 +399,70 @@ gmsh.model.occ.fragment([(3,seal)],[(3, front_glass),(3, front_encap),(3, cell_l
 gmsh.model.occ.fragment([(3, final_front_frame_tag),(3, final_rear_frame_tag),(3, final_left_frame_tag), (3, final_right_frame_tag)],[(3,seal)], removeTool=True)
 
 
+# gmsh.model.occ.synchronize()
 gmsh.model.occ.synchronize()
 
-
-# capture surfaces
+# # capture surfaces
 surf_tag_list = gmsh.model.occ.getEntities(ndim - 1)
-for surf_tag in surf_tag_list[count_surface:-1][:]:
-            surf_id = surf_tag[1]
-            com = gmsh.model.occ.getCenterOfMass(ndim - 1, surf_id)
-
-            # print(com)
-            
-            _add_to_domain_markers("sur"+str(surf_id), [surf_id], "facet")
-            count_surface +=1
-print(count_surface)
-
-# capture volumes
-# frame_names = ["frm_left", "frm_bottom", "frm_right", "frm_top"] 
-# count_volumes=0
+surf_list = surf_tag_list[count_surface:][:]
+count_surface =  surface_tags(surf_list,count_surface,ndim)
 
 vol_tag_list = gmsh.model.occ.getEntities(ndim)
-structure_vol_list = []
-for vol_tag in vol_tag_list:
-    vol_id = vol_tag[1]
-    structure_vol_list.append(vol_id)
-    _add_to_domain_markers("vol"+str(count_volumes), [vol_id], "cell")
-    print(count_volumes)
-    count_volumes +=1
+vol_list = vol_tag_list[count_volumes:][:]
+structure_vol_list +=["back_sheet","back_encap","front_encap","front_glass"]
 
-# set physical attributes
-for key, data in domain_markers.items():
-            if isinstance(data, dict) and "gmsh_tags" in data:
-                # print(key)
-                # Cells (i.e., entities of dim = msh.topology.dim)
-                if data["entity"] == "cell":
-                    gmsh.model.addPhysicalGroup(
-                        ndim, data["gmsh_tags"], data["idx"]
-                    )
-                    gmsh.model.setPhysicalName(ndim, data["idx"], key)
-                    print("added volume ", key)
+for i in range(n_cell_length):
+    for j in range(n_cell_width):
+        structure_vol_list.append("cell"+str(i*n_cell_width + j))
 
-                # Facets (i.e., entities of dim = msh.topology.dim - 1)
-                if data["entity"] == "facet":
-                    gmsh.model.addPhysicalGroup(
-                        ndim - 1, data["gmsh_tags"], data["idx"]
-                    )
-                    gmsh.model.setPhysicalName(ndim - 1, data["idx"], key)
+structure_vol_list.append("cell_layer_encap")
+structure_vol_list.append("seal")
+count_volumes, structure_vol_list =  volume_tags(vol_list,count_volumes,structure_vol_list)
 
-gmsh.model.mesh.generate(3)
-gmsh.write("panel_geo.msh")
-gmsh.write("panel_geo.vtk")
-
-# ################################
-# create physical groups
-# ################################
-# # volume
-gmsh.model.add_physical_group(3, [front_glass], 1)   # front glass is marked as 1 
-gmsh.model.add_physical_group(3, [front_encap], 2)   # front encapsulant is marked as 2
-gmsh.model.add_physical_group(3, [cell_layer_encap_tag], 3)   #  encapsulant in cell layer (around the cells) is marked as 3
-
-cell_tag_list = []
-for i in range(np.shape(cell_list)[0]):
-    cell_tag_list.append(cell_list[i][1])
-gmsh.model.add_physical_group(3, cell_tag_list, 4)   #  cells are marked as 4
-
-gmsh.model.add_physical_group(3, [back_encap], 5)   #  back encapsulant is marked as 5
-gmsh.model.add_physical_group(3, [back_sheet], 6)   #  backsheet is marked as 6
-gmsh.model.add_physical_group(3, [seal], 7)   #  seal volume is marked as 7
-gmsh.model.add_physical_group(3, [final_front_frame_tag, final_rear_frame_tag, final_left_frame_tag, final_right_frame_tag], 8)   #  all frame is marked as 8
-
-
-
-# gmsh.write("panel_geo.msh")
-
-
-# tag surfaces
-
-
-
-# xmin =  0
-# xmax = 
-# ymin = 0
-# ymax = 0.39
-# zmin = 
-# zmax = 
-
-
-
-surf_tag_list = gmsh.model.occ.getEntities(ndim - 1)
-for surf_tag in surf_tag_list:
-            surf_id = surf_tag[1]
-            com = gmsh.model.occ.getCenterOfMass(ndim - 1, surf_id)
-
-            print(com)
-            
-            _add_to_domain_markers(str(count_surface), [surf_id], "facet")
-            count_surface +=1
-            # sturctures tagging
-            # if np.isclose(com[0], params.domain.x_min):
-            #     _add_to_domain_markers("x_min", [surf_id], "facet")
-
-            # elif np.allclose(com[0], params.domain.x_max):
-            #     _add_to_domain_markers("x_max", [surf_id], "facet")
-
-            # elif np.allclose(com[1], params.domain.y_min):
-            #     _add_to_domain_markers("y_min", [surf_id], "facet")
-
-            # elif np.allclose(com[1], params.domain.y_max):
-            #     _add_to_domain_markers("y_max", [surf_id], "facet")
-
-            # elif np.allclose(com[2], params.domain.z_min):
-            #     _add_to_domain_markers("z_min", [surf_id], "facet")
-
-            # elif np.allclose(com[2], params.domain.z_max):
-            #     _add_to_domain_markers("z_max", [surf_id], "facet")
-
-# set length scale 
-print(count_surface)
-
-vol_tag_list = gmsh.model.occ.getEntities(ndim)
-structure_vol_list = []
-for vol_tag in vol_tag_list:
-    vol_id = vol_tag[1]
-    structure_vol_list.append(vol_id)
-
-_add_to_domain_markers("structure", structure_vol_list, "cell")
-
-for key, data in domain_markers.items():
-            if isinstance(data, dict) and "gmsh_tags" in data:
-                # print(key)
-                # Cells (i.e., entities of dim = msh.topology.dim)
-                if data["entity"] == "cell":
-                    gmsh.model.addPhysicalGroup(
-                        ndim, data["gmsh_tags"], data["idx"]
-                    )
-                    gmsh.model.setPhysicalName(ndim, data["idx"], key)
-
-                # Facets (i.e., entities of dim = msh.topology.dim - 1)
-                if data["entity"] == "facet":
-                    gmsh.model.addPhysicalGroup(
-                        ndim - 1, data["gmsh_tags"], data["idx"]
-                    )
-                    gmsh.model.setPhysicalName(ndim - 1, data["idx"], key)
-
+from_domain_markers_to_PhysicalName(domain_markers,ndim)
 
 
 min_dist = []
-# Define a distance field from the immersed panels
-distance = gmsh.model.mesh.field.add("Distance")
-gmsh.model.mesh.field.setNumbers(
-    distance, "FacesList", domain_markers["36"]["gmsh_tags"]
-)
+for volid in structure_vol_list:
+    threshold = set_length_scale(volid,  frame_thick*1, frame_thick*10, 0, 0.1 )#3
+    min_dist.append(threshold)
 
-threshold = gmsh.model.mesh.field.add("Threshold")
-gmsh.model.mesh.field.setNumber(threshold, "IField", distance)
-
-resolution = 0.17/1000 
-# half_panel = params.pv_array.panel_chord * np.cos(params.pv_array.tracker_angle)
-# gmsh.model.mesh.field.setNumber(threshold, "LcMin", resolution * 0.5)
-# resolution = factor * 10 * params.pv_array.panel_thickness / 2
-gmsh.model.mesh.field.setNumber(threshold, "LcMin", resolution )
-
-gmsh.model.mesh.field.setNumber(threshold, "LcMax", 2 * resolution)
-gmsh.model.mesh.field.setNumber(
-    threshold, "DistMin", 1
-)
-gmsh.model.mesh.field.setNumber(
-    threshold, "DistMax", 3
-)
-
-distance2 = gmsh.model.mesh.field.add("Distance")
-gmsh.model.mesh.field.setNumbers(
-    distance2, "FacesList", domain_markers["83"]["gmsh_tags"]
-)
-threshold2 = gmsh.model.mesh.field.add("Threshold")
-gmsh.model.mesh.field.setNumber(threshold, "IField", distance2)
-
-resolution = 1.5/1000
-# half_panel = params.pv_array.panel_chord * np.cos(params.pv_array.tracker_angle)
-# gmsh.model.mesh.field.setNumber(threshold, "LcMin", resolution * 0.5)
-# resolution = factor * 10 * params.pv_array.panel_thickness / 2
-gmsh.model.mesh.field.setNumber(threshold, "LcMin", resolution )
-
-gmsh.model.mesh.field.setNumber(threshold, "LcMax", 2 * resolution)
-gmsh.model.mesh.field.setNumber(
-    threshold, "DistMin", 1
-)
-gmsh.model.mesh.field.setNumber(
-    threshold, "DistMax", 3
-)
-
-
-distance2 = gmsh.model.mesh.field.add("Distance")
-gmsh.model.mesh.field.setNumbers(
-    distance2,
-    "FacesList", domain_markers["83"]["gmsh_tags"]
-)
-threshold2 = gmsh.model.mesh.field.add("Threshold")
-gmsh.model.mesh.field.setNumber(threshold, "IField", distance2)
-
-resolution = 1.5/1000
-# half_panel = params.pv_array.panel_chord * np.cos(params.pv_array.tracker_angle)
-# gmsh.model.mesh.field.setNumber(threshold, "LcMin", resolution * 0.5)
-# resolution = factor * 10 * params.pv_array.panel_thickness / 2
-gmsh.model.mesh.field.setNumber(threshold, "LcMin", resolution )
-
-gmsh.model.mesh.field.setNumber(threshold, "LcMax", 2 * resolution)
-gmsh.model.mesh.field.setNumber(
-    threshold, "DistMin", 1
-)
-gmsh.model.mesh.field.setNumber(
-    threshold, "DistMax", 3
-)
-
+threshold = set_length_scale("back_sheet",  back_sheet_thick*10 ,back_sheet_thick*100, 0, 0.1 )#3
 min_dist.append(threshold)
+threshold = set_length_scale("back_encap",  back_encap_thick*10 , back_encap_thick*100, 0, 0.1 )#3
+min_dist.append(threshold)
+threshold = set_length_scale("front_encap",  front_encap_thick*10 , front_encap_thick*100, 0, 0.1 )#3
+min_dist.append(threshold)
+threshold = set_length_scale("front_glass",  front_glass_thick*10, front_glass_thick*100, 0, 0.1 )#3
+min_dist.append(threshold)
+
+
+for i in range(n_cell_length):
+    for j in range(n_cell_width):
+        threshold = set_length_scale("cell"+str(i*n_cell_width + j),  cell_thick*1, cell_thick*10, 0, .1 )#3
+        min_dist.append(threshold)
+
+threshold = set_length_scale("seal",  seal_thick*10 , seal_thick*100, 0, 0.1 )#3
+min_dist.append(threshold)
+
 minimum = gmsh.model.mesh.field.add("Min")
 gmsh.model.mesh.field.setNumbers(minimum, "FieldsList", min_dist)
 gmsh.model.mesh.field.setAsBackgroundMesh(minimum)
 
 
+gmsh.option.setNumber("Mesh.MeshSizeExtendFromBoundary", 0)
+gmsh.option.setNumber("Mesh.MeshSizeFromPoints", 0)
+gmsh.option.setNumber("Mesh.MeshSizeFromCurvature", 0)     
 
-# mesh generation 
 
-gmsh.option.setNumber("Mesh.Algorithm", 6)
+gmsh.option.setNumber("Mesh.Algorithm", 5)
 gmsh.option.setNumber("Mesh.Algorithm3D", 1)
 gmsh.option.setNumber("Mesh.RecombinationAlgorithm", 0)
+gmsh.model.mesh.setOrder(1)
+
 
 gmsh.model.mesh.generate(3)
-gmsh.model.mesh.setOrder(2)
-gmsh.model.mesh.optimize("Relocate3D")
-gmsh.model.mesh.generate(3)
-
 gmsh.write("panel_geo.msh")
 gmsh.write("panel_geo.vtk")
-# #######################
-# # create mesh
-# #######################
-
-# gmsh.option.setNumber('Mesh.MeshSizeMin', 0.001)
-# gmsh.option.setNumber('Mesh.MeshSizeMax', 0.001)
-
-# gmsh.model.mesh.generate(3)
-# gmsh.write('panel.vtk')
 
 gmsh.finalize()
