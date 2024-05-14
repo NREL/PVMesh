@@ -94,9 +94,62 @@ def set_length_scale(surface_id,  lcmin, lcmax, dismin, distmax ):
 
     return threshold
 
+
+def process_input_file(input_file_path):
+    # Initialize variables
+    cell_thick = ''
+    n_cell_length = ''       
+    n_cell_width = ''      
+    front_glass_thick = ''   
+    front_encap_thick= ''    
+    back_encap_thick= ''     
+
+    # Read input values from the text file
+    try:
+        with open(input_file_path, 'r') as file:
+            lines = file.readlines()
+    except FileNotFoundError:
+        print(f"{input_file_path} not found. Reading from original.txt instead.")
+        input_file_path = "original.txt"
+        with open(input_file_path, 'r') as file:
+            lines = file.readlines()
+
+    for line in lines:
+        key, value = line.strip().split(": ")
+        if key == "cell_thick":
+            cell_thick = value
+        elif key == "n_cell_length":
+            n_cell_length = value
+        elif key == "n_cell_width":
+            n_cell_width = value
+        elif key == "front_glass_thick":
+            front_glass_thick = value
+        elif key == "front_encap_thick":
+            front_encap_thick = value
+        elif key == "back_encap_thick":
+            back_encap_thick = value
+
+    # Print the variables (replace with your processing logic)
+    print("cell_thick:", cell_thick)
+    print("n_cell_length:", n_cell_length)
+    print("n_cell_width:", n_cell_width)
+    print("front_glass_thick:", front_glass_thick)
+    print("front_encap_thick:", front_encap_thick)
+    print("back_encap_thick:", back_encap_thick)
+
+
+
+input_file_path = "input.txt"  # Replace with the actual path of the input file
+process_input_file(input_file_path)
+
+
 ##################################
 # define parameters
 ##################################
+
+
+exit()
+
 
 cell_length = 182.0/1000      # length of each cell in m
 cell_width = 182.0/1000       # width of each cell in m
@@ -423,7 +476,7 @@ from_domain_markers_to_PhysicalName(domain_markers,ndim)
 
 
 min_dist = []
-for volid in structure_vol_list:
+for volid in structure_vol_list[0:4]:
     threshold = set_length_scale(volid,  frame_thick*1, frame_thick*10, 0, 0.1 )#3
     min_dist.append(threshold)
 
@@ -439,7 +492,7 @@ min_dist.append(threshold)
 
 for i in range(n_cell_length):
     for j in range(n_cell_width):
-        threshold = set_length_scale("cell"+str(i*n_cell_width + j),  cell_thick*1, cell_thick*10, 0, .1 )#3
+        threshold = set_length_scale("cell"+str(i*n_cell_width + j),  cell_thick*.5, cell_thick*1, 0, .1 )#3
         min_dist.append(threshold)
 
 threshold = set_length_scale("seal",  seal_thick*10 , seal_thick*100, 0, 0.1 )#3
