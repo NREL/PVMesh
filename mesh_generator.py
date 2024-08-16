@@ -102,7 +102,17 @@ def process_input_file(input_file_path):
     n_cell_width = ''      
     front_glass_thick = ''   
     front_encap_thick= ''    
-    back_encap_thick= ''     
+    back_encap_thick= ''   
+    file_format= ''  
+    cell_length= ''
+    cell_width= ''
+    back_sheet_thick= ''
+    perimeter_margin= ''
+    cell_cell_gap_x = ''
+    cell_cell_gap_y = ''
+    clip_thick=''
+    seal_length=''
+    frame_thick=''
 
     # Read input values from the text file
     try:
@@ -128,6 +138,27 @@ def process_input_file(input_file_path):
             front_encap_thick = value
         elif key == "back_encap_thick":
             back_encap_thick = value
+        elif key == "file_format":
+            file_format = value
+        elif key == "cell_width":
+            cell_width = value
+        elif key == "cell_length":
+            cell_length = value
+        elif key == "back_sheet_thick":
+            back_sheet_thick = value
+        elif key == "perimeter_margin":
+            perimeter_margin = value
+        elif key == "cell_cell_gap_x":
+            cell_cell_gap_x = value
+        elif key == "cell_cell_gap_y":
+            cell_cell_gap_y = value
+        elif key == "clip_thick":
+            clip_thick = value
+        elif key == "seal_length":
+            seal_length = value
+        elif key == "frame_thick":
+            frame_thick = value
+       
 
     # Print the variables (replace with your processing logic)
     print("cell_thick:", cell_thick)
@@ -136,53 +167,63 @@ def process_input_file(input_file_path):
     print("front_glass_thick:", front_glass_thick)
     print("front_encap_thick:", front_encap_thick)
     print("back_encap_thick:", back_encap_thick)
+    print("file_format:", file_format)
 
+    print("input func finished")
 
+    return float(cell_thick), int(n_cell_length) , int(n_cell_width), float(front_glass_thick) ,\
+          float(front_encap_thick), float(back_encap_thick), float(cell_length), float(cell_width) ,\
+              float(back_sheet_thick), file_format, float(perimeter_margin), float(cell_cell_gap_x), \
+                float(cell_cell_gap_y), float(clip_thick), float(seal_length), float(frame_thick)
 
 input_file_path = "input.txt"  # Replace with the actual path of the input file
-process_input_file(input_file_path)
+cell_thick, n_cell_length , n_cell_width, front_glass_thick ,\
+      front_encap_thick, back_encap_thick, cell_length, cell_width , \
+        back_sheet_thick , file_format, perimeter_margin, cell_cell_gap_x ,\
+              cell_cell_gap_y, clip_thick, seal_length, frame_thick  = process_input_file(input_file_path)
 
 
 ##################################
 # define parameters
 ##################################
+scale = 1000
 
+mesh_scale_min = 100
+mesh_scale_max = 1000
+ 
 
-exit()
+cell_length /= scale      # length of each cell in m
+cell_width /= scale       # width of each cell in m
+cell_thick /= scale     # thick ness of cell in m
 
+# n_cell_length = 3       # number of cells along x
+# n_cell_width = 2         # number of cells along y
 
-cell_length = 182.0/1000      # length of each cell in m
-cell_width = 182.0/1000       # width of each cell in m
-cell_thick = 0.17/1000   # thick ness of cell in m
+perimeter_margin /=scale  # edge margin in m
 
-n_cell_length = 3       # number of cells along x
-n_cell_width = 2         # number of cells along y
+cell_cell_gap_x /= scale  # gap between cell along x, in m
+cell_cell_gap_y /= scale  # gap between cell along y, in m
 
-perimeter_margin = 10.0/1000  # edge margin in m
-
-cell_cell_gap_x = 2.5/1000  # gap between cell along x, in m
-cell_cell_gap_y = 2.5/1000  # gap between cell along y, in m
-
-front_glass_thick = 3.2/1000  # thickness of gront glass layer
-front_encap_thick = 0.45/1000    # thickness of front encapsulant layer, in m
-back_encap_thick = 0.45/1000     # thickness of back encapsulant layer, in m
-back_sheet_thick = 0.35/1000     # thickness of backsheet or back glass, in m
+front_glass_thick /= scale  # thickness of gront glass layer
+front_encap_thick /= scale    # thickness of front encapsulant layer, in m
+back_encap_thick /= scale     # thickness of back encapsulant layer, in m
+back_sheet_thick /= scale     # thickness of backsheet or back glass, in m
 
 panel_thick = cell_thick+front_glass_thick+front_encap_thick+back_encap_thick+back_sheet_thick
 panel_length = cell_length*n_cell_length+(n_cell_length-1)*cell_cell_gap_x+2*perimeter_margin    # total length of the panel
 panel_width = cell_width*n_cell_width+(n_cell_width-1)*cell_cell_gap_y+2*perimeter_margin    # total width of the panel
 
-clip_thick = 6.0/1000            # open space of frame (parameter d)
+clip_thick /= scale            # open space of frame (parameter d)
 
-seal_length = 2.0/1000           # width of seal (distance from panel edge to frame, parameter f)
+seal_length /= scale           # width of seal (distance from panel edge to frame, parameter f)
 seal_thick = (clip_thick-panel_thick)/2    # distance from top of panel to fram (parameter e)
 
-frame_thick = 1.5/1000            # thickness of frame (paramater t)
+frame_thick /= scale            # thickness of frame (paramater t)
 
-c = 12.0/1000
-b = 4.0/1000
-a = 35.0/1000
-h = 50.0/1000
+c = 12.0/scale
+b = 4.0/scale
+a = 35.0/scale
+h = 50.0/scale
 
 cover_length = c-frame_thick-seal_length   # covered length of panel at each edge.
 
@@ -477,25 +518,25 @@ from_domain_markers_to_PhysicalName(domain_markers,ndim)
 
 min_dist = []
 for volid in structure_vol_list[0:4]:
-    threshold = set_length_scale(volid,  frame_thick*1, frame_thick*10, 0, 0.1 )#3
+    threshold = set_length_scale(volid,  frame_thick*mesh_scale_min/10, frame_thick*mesh_scale_min/10, 0, 0.1 )#3
     min_dist.append(threshold)
 
-threshold = set_length_scale("back_sheet",  back_sheet_thick*10 ,back_sheet_thick*100, 0, 0.1 )#3
+threshold = set_length_scale("back_sheet",  back_sheet_thick*mesh_scale_min ,back_sheet_thick*mesh_scale_max, 0, 0.1 )#3
 min_dist.append(threshold)
-threshold = set_length_scale("back_encap",  back_encap_thick*10 , back_encap_thick*100, 0, 0.1 )#3
+threshold = set_length_scale("back_encap",  back_encap_thick*mesh_scale_min , back_encap_thick*mesh_scale_max, 0, 0.1 )#3
 min_dist.append(threshold)
-threshold = set_length_scale("front_encap",  front_encap_thick*10 , front_encap_thick*100, 0, 0.1 )#3
+threshold = set_length_scale("front_encap",  front_encap_thick*mesh_scale_min , front_encap_thick*mesh_scale_max, 0, 0.1 )#3
 min_dist.append(threshold)
-threshold = set_length_scale("front_glass",  front_glass_thick*10, front_glass_thick*100, 0, 0.1 )#3
+threshold = set_length_scale("front_glass",  front_glass_thick*mesh_scale_min, front_glass_thick*mesh_scale_max, 0, 0.1 )#3
 min_dist.append(threshold)
 
 
 for i in range(n_cell_length):
     for j in range(n_cell_width):
-        threshold = set_length_scale("cell"+str(i*n_cell_width + j),  cell_thick*.5, cell_thick*1, 0, .1 )#3
+        threshold = set_length_scale("cell"+str(i*n_cell_width + j),  cell_thick*.5*mesh_scale_min/10, cell_thick*mesh_scale_max/10, 0, .1 )#3
         min_dist.append(threshold)
 
-threshold = set_length_scale("seal",  seal_thick*10 , seal_thick*100, 0, 0.1 )#3
+threshold = set_length_scale("seal",  seal_thick*mesh_scale_min , seal_thick*mesh_scale_max, 0, 0.1 )#3
 min_dist.append(threshold)
 
 minimum = gmsh.model.mesh.field.add("Min")
@@ -515,7 +556,23 @@ gmsh.model.mesh.setOrder(1)
 
 
 gmsh.model.mesh.generate(3)
-gmsh.write("panel_geo.msh")
-gmsh.write("panel_geo.vtk")
+
+
+if file_format == "vtk":
+    gmsh.write("panel_geo.vtk")
+elif file_format == "msh":
+    gmsh.write("panel_geo.msh")
+elif file_format == "inp":
+    gmsh.write("panel_geo.inp")
+elif file_format == "bdf":
+    gmsh.write("panel_geo.bdf")
+else: 
+    "file Format not recognised"
+    
+
+
 
 gmsh.finalize()
+
+
+print("Mesh generated")
