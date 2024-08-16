@@ -1,0 +1,6 @@
+cell_thick: 0.17/1000   
+n_cell_length: 3       
+n_cell_width: 2         
+front_glass_thick: 3.2/1000  
+front_encap_thick: 0.45/1000    
+back_encap_thick: 0.45/1000     
