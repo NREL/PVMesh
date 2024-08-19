@@ -100,7 +100,9 @@ def process_input_file(input_file_path):
     cell_thick = ''
     n_cell_length = ''       
     n_cell_width = ''      
-    front_glass_thick = ''    
+    front_glass_thick = ''   
+    front_encap_thick= ''    
+    back_encap_thick= ''   
     file_format= ''  
     cell_length= ''
     cell_width= ''
@@ -132,6 +134,10 @@ def process_input_file(input_file_path):
             n_cell_width = value
         elif key == "front_glass_thick":
             front_glass_thick = value
+        elif key == "front_encap_thick":
+            front_encap_thick = value
+        elif key == "back_encap_thick":
+            back_encap_thick = value
         elif key == "file_format":
             file_format = value
         elif key == "cell_width":
@@ -159,18 +165,20 @@ def process_input_file(input_file_path):
     print("n_cell_length:", n_cell_length)
     print("n_cell_width:", n_cell_width)
     print("front_glass_thick:", front_glass_thick)
+    print("front_encap_thick:", front_encap_thick)
+    print("back_encap_thick:", back_encap_thick)
     print("file_format:", file_format)
 
     print("input func finished")
 
     return float(cell_thick), int(n_cell_length) , int(n_cell_width), float(front_glass_thick) ,\
-          float(cell_length), float(cell_width) ,\
+          float(front_encap_thick), float(back_encap_thick), float(cell_length), float(cell_width) ,\
               float(back_sheet_thick), file_format, float(perimeter_margin), float(cell_cell_gap_x), \
                 float(cell_cell_gap_y), float(clip_thick), float(seal_length), float(frame_thick)
 
 input_file_path = "input.txt"  # Replace with the actual path of the input file
 cell_thick, n_cell_length , n_cell_width, front_glass_thick ,\
-       cell_length, cell_width , \
+      front_encap_thick, back_encap_thick, cell_length, cell_width , \
         back_sheet_thick , file_format, perimeter_margin, cell_cell_gap_x ,\
               cell_cell_gap_y, clip_thick, seal_length, frame_thick  = process_input_file(input_file_path)
 
@@ -197,12 +205,8 @@ cell_cell_gap_x /= scale  # gap between cell along x, in m
 cell_cell_gap_y /= scale  # gap between cell along y, in m
 
 front_glass_thick /= scale  # thickness of gront glass layer
-
-
-front_encap_thick = 0.45/scale-cell_thick/2    # thickness of front encapsulant layer, in m
-back_encap_thick  = 0.45/scale-cell_thick/2     # thickness of back encapsulant layer, in m
-
-
+front_encap_thick /= scale    # thickness of front encapsulant layer, in m
+back_encap_thick /= scale     # thickness of back encapsulant layer, in m
 back_sheet_thick /= scale     # thickness of backsheet or back glass, in m
 
 panel_thick = cell_thick+front_glass_thick+front_encap_thick+back_encap_thick+back_sheet_thick

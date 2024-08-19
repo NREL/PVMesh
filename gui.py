@@ -30,6 +30,8 @@ def generate_text_and_execute_script():
     n_cell_length = n_cell_length_entry.get()
     n_cell_width = n_cell_width_entry.get()
     front_glass_thick = front_glass_thick_entry.get()
+    front_encap_thick = front_encap_thick_entry.get()
+    back_encap_thick = back_encap_thick_entry.get()
     back_sheet_thick = back_sheet_thick_entry.get()
     file_format = file_format_entry.get()
 
@@ -57,6 +59,8 @@ def generate_text_and_execute_script():
         file.write(f"n_cell_length: {n_cell_length}\n")
         file.write(f"n_cell_width: {n_cell_width}\n")
         file.write(f"front_glass_thick: {front_glass_thick}\n")
+        file.write(f"front_encap_thick: {front_encap_thick}\n")
+        file.write(f"back_encap_thick: {back_encap_thick}\n")
         file.write(f"back_sheet_thick: {back_sheet_thick}\n")
         file.write(f"file_format: {file_format}\n")
 
@@ -73,7 +77,7 @@ def generate_text_and_execute_script():
 
     # Execute the other Python script with the input values as arguments
     script_path = "mesh_generator.py"
-    command = ["python", script_path]
+    command = ["python", script_path, cell_thick, n_cell_length, n_cell_width, front_glass_thick, front_encap_thick, back_encap_thick]
 
     # Start the subprocess and capture its output
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
@@ -147,6 +151,8 @@ clip_thick_label, clip_thick_entry, row_index = create_label_entry (row_index, "
 seal_length_label, seal_length_entry, row_index = create_label_entry (row_index, "seal_length", "Width of seal  ?? (mm)", root , preset_values)
 frame_thick_label, frame_thick_entry, row_index = create_label_entry (row_index, "frame_thick", "Thickness of the frame (mm)", root , preset_values)
 front_glass_thick_label, front_glass_thick_entry, row_index = create_label_entry (row_index, "front_glass_thick", "Thickness of the front glass (mm)", root , preset_values)
+front_encap_thick_label, front_encap_thick_entry, row_index = create_label_entry (row_index, "front_encap_thick", "Thickness of the front encapsulent (mm)", root , preset_values)
+back_encap_thick_label, back_encap_thick_entry, row_index = create_label_entry (row_index, "back_encap_thick", "Thickness of the back encapsulent (mm)", root , preset_values)
 back_sheet_thick_label, back_sheet_thick_entry, row_index = create_label_entry (row_index, "back_sheet_thick", "Thickness of the back sheet (mm)", root , preset_values)
 file_format_label, file_format_entry, row_index = create_label_entry (row_index, "file_format", "Mesh file format",root , preset_values)
 
