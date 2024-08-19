@@ -114,6 +114,11 @@ def process_input_file(input_file_path):
     seal_length=''
     frame_thick=''
 
+    c = ''
+    b = ''
+    a = ''
+    h = ''
+
     # Read input values from the text file
     try:
         with open(input_file_path, 'r') as file:
@@ -158,6 +163,14 @@ def process_input_file(input_file_path):
             seal_length = value
         elif key == "frame_thick":
             frame_thick = value
+        elif key == "a":
+            a = value 
+        elif key == "b":
+            b = value 
+        elif key == "c":
+            c = value 
+        elif key == "h":
+            h = value 
        
 
     # Print the variables (replace with your processing logic)
@@ -174,13 +187,14 @@ def process_input_file(input_file_path):
     return float(cell_thick), int(n_cell_length) , int(n_cell_width), float(front_glass_thick) ,\
           float(front_encap_thick), float(back_encap_thick), float(cell_length), float(cell_width) ,\
               float(back_sheet_thick), file_format, float(perimeter_margin), float(cell_cell_gap_x), \
-                float(cell_cell_gap_y), float(clip_thick), float(seal_length), float(frame_thick)
+                float(cell_cell_gap_y), float(clip_thick), float(seal_length), float(frame_thick),\
+                float(a), float(b), float(c), float(h)
 
 input_file_path = "input.txt"  # Replace with the actual path of the input file
 cell_thick, n_cell_length , n_cell_width, front_glass_thick ,\
       front_encap_thick, back_encap_thick, cell_length, cell_width , \
         back_sheet_thick , file_format, perimeter_margin, cell_cell_gap_x ,\
-              cell_cell_gap_y, clip_thick, seal_length, frame_thick  = process_input_file(input_file_path)
+              cell_cell_gap_y, clip_thick, seal_length, frame_thick , a, b,c, h  = process_input_file(input_file_path)
 
 
 ##################################
@@ -220,10 +234,10 @@ seal_thick = (clip_thick-panel_thick)/2    # distance from top of panel to fram 
 
 frame_thick /= scale            # thickness of frame (paramater t)
 
-c = 12.0/scale
-b = 4.0/scale
-a = 35.0/scale
-h = 50.0/scale
+c /=scale
+b /=scale
+a /=scale
+h /=scale
 
 cover_length = c-frame_thick-seal_length   # covered length of panel at each edge.
 

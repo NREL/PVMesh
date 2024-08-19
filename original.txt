@@ -14,3 +14,7 @@ cell_cell_gap_y: 2.5
 clip_thick: 6.
 seal_length: 2.
 frame_thick: 1.5
+c: 12.0
+b: 4.0
+a: 35.0
+h: 50.0

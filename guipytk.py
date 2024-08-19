@@ -3,13 +3,27 @@ import subprocess
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTextEdit, QScrollArea, QFormLayout
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
+import os 
 
 class MyApp(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        
+
+    
+
     def initUI(self):
+
+        def resource_path(relative_path):
+            """ Get the absolute path to a resource, works for dev and for PyInstaller """
+            try:
+                # PyInstaller creates a temporary folder and stores the path in _MEIPASS
+                base_path = sys._MEIPASS
+            except Exception:
+                base_path = os.path.abspath(".")
+
+            return os.path.join(base_path, relative_path)
+    
         # Layouts
         mainLayout = QHBoxLayout()
         
@@ -17,9 +31,14 @@ class MyApp(QWidget):
         self.imageLabel1 = QLabel()
         self.imageLabel2 = QLabel()
         
+        
+
+
         # Load and resize images
-        pixmap1 = QPixmap('pv_model.png')
-        pixmap2 = QPixmap('frame.png')
+        # pixmap1 = QPixmap(PVmesh_dir+'/pv_model.png')
+        # pixmap2 = QPixmap(PVmesh_dir+'/frame3.png')
+        pixmap1 = QPixmap(resource_path('pv_model.png'))
+        pixmap2 = QPixmap(resource_path('frame3.png'))
         resized_pixmap1 = pixmap1.scaled(600, 600, Qt.AspectRatioMode.KeepAspectRatio)
         resized_pixmap2 = pixmap2.scaled(600, 600, Qt.AspectRatioMode.KeepAspectRatio)
         
@@ -86,9 +105,19 @@ class MyApp(QWidget):
         self.setPresetValues(variable_names)
 
     def setPresetValues(self, variable_names):
+        def resource_path(relative_path):
+            """ Get the absolute path to a resource, works for dev and for PyInstaller """
+            try:
+                # PyInstaller creates a temporary folder and stores the path in _MEIPASS
+                base_path = sys._MEIPASS
+            except Exception:
+                base_path = os.path.abspath(".")
+
+            return os.path.join(base_path, relative_path)
+        
         print("Setting preset values...")  # Debug statement
         try:
-            with open('original.txt', 'r') as file:
+            with open(resource_path('original.txt'), 'r') as file:
                 lines = file.readlines()
                 for line in lines:
                     if ':' in line:
@@ -115,12 +144,22 @@ class MyApp(QWidget):
                     field.setStyleSheet("border: 1px solid green;")
 
     def executeScript(self):
+        def resource_path(relative_path):
+            """ Get the absolute path to a resource, works for dev and for PyInstaller """
+            try:
+                # PyInstaller creates a temporary folder and stores the path in _MEIPASS
+                base_path = sys._MEIPASS
+            except Exception:
+                base_path = os.path.abspath(".")
+
+            return os.path.join(base_path, relative_path)
+        # PVmesh_dir = os.getcwd()
         # Collect input values
         inputValues = {key: field.text() for key, field in self.inputFields.items()}
         
         # Save input values to 'input.txt'
         try:
-            with open('input.txt', 'w') as file:
+            with open(resource_path('input.txt'), 'w') as file:
                 for key, value in inputValues.items():
                     file.write(f"{key}: {value}\n")
             print("Input values saved to 'input.txt'.")  # Debug statement
@@ -130,8 +169,14 @@ class MyApp(QWidget):
             return
 
         # Prepare command to execute your Python script
-        script_path = "mesh_generator.py"
+        script_path = resource_path('mesh_generator.py')
+
+        print('script_path')
+
+
         command = ['python', script_path]
+
+        
 
         # Use a try-except block to handle exceptions during script execution
         try:
