@@ -37,8 +37,8 @@ class MyApp(QWidget):
         # Load and resize images
         # pixmap1 = QPixmap(PVmesh_dir+'/pv_model.png')
         # pixmap2 = QPixmap(PVmesh_dir+'/frame3.png')
-        pixmap1 = QPixmap(resource_path('pv_model.png'))
-        pixmap2 = QPixmap(resource_path('frame3.png'))
+        pixmap1 = QPixmap(resource_path('figures/pv_model.png'))
+        pixmap2 = QPixmap(resource_path('figures/frame3.png'))
         resized_pixmap1 = pixmap1.scaled(600, 600, Qt.AspectRatioMode.KeepAspectRatio)
         resized_pixmap2 = pixmap2.scaled(600, 600, Qt.AspectRatioMode.KeepAspectRatio)
         
@@ -169,7 +169,7 @@ class MyApp(QWidget):
             return
 
         # Prepare command to execute your Python script
-        script_path = resource_path('mesh_generator.py')
+        script_path = resource_path('pvmesh/mesh_generator.py')
 
         print('script_path')
 
