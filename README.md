@@ -39,7 +39,7 @@ python guipytk.py.py
 
 The GUI should appear as a pop-up window. 
 
-![alt text](gui2.png "")
+![alt text](figures/gui2.png "")
 
 The user interface should look like this. 
 The two figures demonstrate what the variables controls. 
