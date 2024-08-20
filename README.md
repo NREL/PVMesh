@@ -14,7 +14,7 @@ Among the file formats that can be generated with PVmesh we have:
 
 ## Getting Started 
 
-PVmesh use primarly gmsh as the backend for mesh generation and tkinter/pyQt for the GUI.
+PVmesh use primarly [GMSH](https://gmsh.info) as the backend for mesh generation and  [PyQt5](https://www.riverbankcomputing.com/static/Docs/PyQt5/) for the GUI.
 
 Installation of the pre-requisits for PVmesh can be done through conda/mamba using the follwing command
 
@@ -39,7 +39,7 @@ python guipytk.py.py
 
 The GUI should appear as a pop-up window. 
 
-![alt text](GUI2.png "")
+![alt text](gui2.png "")
 
 The user interface should look like this. 
 The two figures demonstrate what the variables controls. 
@@ -74,6 +74,7 @@ In the case where input.txt is not available, mesh_generator.py will use origina
 
 ## Code structure:  mesh_generator.py
 
+### Variables 
 
 The variables that control the geometry of the panel are the following:
 
@@ -92,19 +93,31 @@ The variables that control the geometry of the panel are the following:
 
 - back_sheet_thick: thickness of backsheet or back glass
 - perimeter_margin: edge margin
-
-- clip_thick: open space of frame (parameter d)
-- seal_length: width of seal (distance from panel edge to frame, parameter f)
-- frame_thick:  thickness of frame (paramater t)
-- c: 12.0
-- b: 4.0
-- a: 35.0
-- h: 50.0
-
-file_format: format of the generated mesh
+- file_format: format of the generated mesh
 
 
 
+- parameters `a`,`b`,`c`,`h` are frame parameters and are shown in the frame illustration in the GUI picture above. 
+
+- clip_thick: open space of frame ( `d`) 
+- seal_length: width of seal (distance from panel edge to frame, `f`)
+- frame_thick:  thickness of frame (`t`)
+
+
+
+
+
+### Panel Geometry
+
+Once the variables are defined, the panel geometry is created in steps. 
+The panel is decomposed into 7 substructures: frame, back_sheet, back_encap, cell_layer, front_encap, front_glass and cells. 
+to finalize the geometry a seal is added to close the gap between the frame and the multilayered panel. 
+
+### Panel mesh 
+
+The geometry created is sorted to obtain 1D, 2D and 3D elements. 
+Each substructor is meshed based on its geometry.
+Adaptive mesh refinement is used to reduce mesh density where its not needed. 
 
 
 
