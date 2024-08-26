@@ -1,7 +1,8 @@
 import numpy as np
 import gmsh
 import math
-
+import sys
+import os 
 
 """
 create surface and volume marker
@@ -20,6 +21,14 @@ def surface_tags(surf_list,count_surface):
                 _add_to_domain_markers("sur"+str(surf_id), [surf_id], "facet")
                 count_surface +=1
     return count_surface
+
+def resource_path(relative_path):
+            """Get the absolute path to a resource, works for dev and for PyInstaller"""
+            try:
+                base_path = sys._MEIPASS
+            except Exception:
+                base_path = os.path.abspath(".")
+            return os.path.join(base_path, relative_path)
 
 def _add_to_domain_markers(marker_name, gmsh_tags, entity_type):
     # Create a dictionary to hold the gmsh tags associated with
@@ -92,6 +101,8 @@ def process_input_file(input_file_path):
     mounting_area_shape = '' 
     mounting_area_size = '' 
     mounting_location = ''
+
+
 
     # Read input values from the text file
     try:
@@ -178,13 +189,42 @@ def process_input_file(input_file_path):
 """
 define parameters
 """
-input_file_path = "input.txt"  # Replace with the actual path of the input file
+
+if len(sys.argv) > 1:
+    # Assign the first argument to a variable
+    input_file_path = sys.argv[1]
+    input_name = sys.argv[2]
+else:
+    input_file_path = resource_path("input1/input_1.txt")
+    input_name = resource_path("input1")
+
 cell_thick, n_cell_length , n_cell_width, front_glass_thick ,\
       front_encap_thick, back_encap_thick, cell_length, cell_width , \
         back_sheet_thick , file_format, perimeter_margin, cell_cell_gap_x ,\
               cell_cell_gap_y, clip_thick, seal_length, frame_thick , a, b,c, h, \
                   mesh_size_in_cell, mesh_size_out_cell, \
                 mounting_area_shape, mounting_area_size, mounting_location  = process_input_file(input_file_path)
+
+
+
+
+if input_name:
+    # Define the folder path
+    folder_path = os.path.join(os.getcwd(), input_name)
+    
+    # Check if the folder already exists
+    if not os.path.exists(folder_path):
+        # Create the directory
+        os.makedirs(folder_path)
+        print(f"Folder '{input_name}' created.")
+    else:
+        print(f"Folder '{input_name}' already exists.")
+else:
+    print("Input name is empty. No folder created.")
+
+
+print(input_name)
+
 
 
 """
@@ -727,7 +767,7 @@ number_volume_groups = len(all_volume_list)
 
 
 gmsh.model.occ.synchronize()
-gmsh.write("panel_geo.brep")
+gmsh.write(input_name+"/panel_geo.brep")
 
 
 """
@@ -838,14 +878,21 @@ save mesh files
 # # gmsh.write("panel_geo.wrl")
 # gmsh.write("panel_geo.bdf")      # bdf file for comsol
 
+
+output_fold = resource_path("output")
+
+
+
+    
+
 if file_format == "vtk":
-    gmsh.write("PV_mesh.vtk")
+    gmsh.write(input_name+"/PV_mesh.vtk")
 elif file_format == "msh":
-    gmsh.write("PV_mesh.msh")
+    gmsh.write(input_name+"/PV_mesh.msh")
 elif file_format == "inp":
-    gmsh.write("PV_mesh.inp")
+    gmsh.write(input_name+"/PV_mesh.inp")
 elif file_format == "bdf":
-    gmsh.write("PV_mesh.bdf")
+    gmsh.write(input_name+"/PV_mesh.bdf")
 else: 
     "file Format not recognised"
 
