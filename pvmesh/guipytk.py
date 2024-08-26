@@ -4,10 +4,18 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLa
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 import os 
+from PyQt5.QtCore import QProcess
 
 class MyApp(QWidget):
     def __init__(self):
         super().__init__()
+
+        self.process = QProcess(self)
+        self.process.readyReadStandardOutput.connect(self.handle_stdout)
+        self.process.readyReadStandardError.connect(self.handle_stderr)
+        self.process.finished.connect(self.on_process_finished)
+
+
         self.initUI()
 
     
@@ -60,7 +68,8 @@ class MyApp(QWidget):
             'cell_thick', 'cell_width', 'cell_length', 'n_cell_length', 'n_cell_width',
             'front_glass_thick', 'front_encap_thick', 'back_encap_thick', 'file_format',
             'back_sheet_thick', 'perimeter_margin', 'cell_cell_gap_x', 'cell_cell_gap_y',
-            'clip_thick', 'seal_length', 'frame_thick', 'c', 'b', 'a', 'h'
+            'clip_thick', 'seal_length', 'frame_thick', 'c', 'b', 'a', 'h',
+            'mesh_size_in_cell','mesh_size_out_cell','mounting_area_shape','mounting_area_size','mounting_location'
         ]
         
         # Create input fields
@@ -137,7 +146,13 @@ class MyApp(QWidget):
     def validateInput(self):
         for var, field in self.inputFields.items():
             text = field.text()
-            if var in ['cell_thick', 'cell_width', 'cell_length', 'n_cell_length', 'n_cell_width', 'front_glass_thick', 'front_encap_thick', 'back_encap_thick', 'back_sheet_thick', 'perimeter_margin', 'cell_cell_gap_x', 'cell_cell_gap_y', 'clip_thick', 'seal_length', 'frame_thick', 'c', 'b', 'a', 'h']:
+            if var in ['cell_thick', 'cell_width', 'cell_length',\
+                        'n_cell_length', 'n_cell_width', 'front_glass_thick',\
+                              'front_encap_thick', 'back_encap_thick', 'back_sheet_thick',\
+                                  'perimeter_margin', 'cell_cell_gap_x', 'cell_cell_gap_y',\
+                                      'clip_thick', 'seal_length', 'frame_thick',\
+                                          'c', 'b', 'a', 'h','mesh_size_in_cell',\
+                                            'mesh_size_out_cell','mounting_area_size','mounting_location']:
                 if not text.replace('.', '', 1).isdigit():
                     field.setStyleSheet("border: 1px solid red;")
                 else:
@@ -176,30 +191,47 @@ class MyApp(QWidget):
 
         command = ['python', script_path]
 
-        
+        self.process.start('mpirun', ['-n', str(1), 'python', script_path])
 
-        # Use a try-except block to handle exceptions during script execution
-        try:
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            stdout, stderr = process.communicate()
+        # # Use a try-except block to handle exceptions during script execution
+        # try:
+        #     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        #     stdout, stderr = process.communicate()
 
-            # Update output text area
-            self.outputText.clear()
-            if stdout:
-                self.outputText.append("Output:\n" + stdout)
-            if stderr:
-                self.outputText.append("Errors:\n" + stderr)
+        #     # Update output text area
+        #     self.outputText.clear()
+        #     if stdout:
+        #         self.outputText.append("Output:\n" + stdout)
+        #     if stderr:
+        #         self.outputText.append("Errors:\n" + stderr)
             
-            if process.returncode != 0:
-                # If the script returns a non-zero exit code, display a general error message
-                self.outputText.append(f"Script execution failed with exit code {process.returncode}.")
+        #     if process.returncode != 0:
+        #         # If the script returns a non-zero exit code, display a general error message
+        #         self.outputText.append(f"Script execution failed with exit code {process.returncode}.")
         
-        except FileNotFoundError:
-            self.outputText.clear()
-            self.outputText.append(f"Error: The script file '{script_path}' was not found.")
-        except Exception as e:
-            self.outputText.clear()
-            self.outputText.append(f"An unexpected error occurred: {e}")
+        # except FileNotFoundError:
+        #     self.outputText.clear()
+        #     self.outputText.append(f"Error: The script file '{script_path}' was not found.")
+        # except Exception as e:
+        #     self.outputText.clear()
+        #     self.outputText.append(f"An unexpected error occurred: {e}")
+
+
+    def handle_stdout(self):
+        # Append standard output to the output text box
+        data = self.process.readAllStandardOutput().data().decode()
+        self.outputText.append(data)
+        self.outputText.verticalScrollBar().setValue(self.outputText.verticalScrollBar().maximum())
+
+    def handle_stderr(self):
+        # Append standard error to the output text box
+        data = self.process.readAllStandardError().data().decode()
+        self.outputText.append(f"Error: {data}")
+        self.outputText.verticalScrollBar().setValue(self.outputText.verticalScrollBar().maximum())
+
+    def on_process_finished(self):
+        # Process finished, handle any final updates if needed
+        self.outputText.append("Process finished.")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

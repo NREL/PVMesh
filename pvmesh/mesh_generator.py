@@ -158,13 +158,13 @@ def process_input_file(input_file_path):
        
 
     # Print the variables (replace with your processing logic)
-    print("cell_thick:", cell_thick)
-    print("n_cell_length:", n_cell_length)
-    print("n_cell_width:", n_cell_width)
-    print("front_glass_thick:", front_glass_thick)
-    print("front_encap_thick:", front_encap_thick)
-    print("back_encap_thick:", back_encap_thick)
-    print("file_format:", file_format)
+    # print("cell_thick:", cell_thick)
+    # print("n_cell_length:", n_cell_length)
+    # print("n_cell_width:", n_cell_width)
+    # print("front_glass_thick:", front_glass_thick)
+    # print("front_encap_thick:", front_encap_thick)
+    # print("back_encap_thick:", back_encap_thick)
+    # print("file_format:", file_format)
 
     print("input func finished")
 
@@ -236,7 +236,6 @@ frame_extended = 0.1*cell_length                       # the frame is created lo
 surface_extended  =  500                   # a surface is created to cut the frame, the surface is created bigger than panel. in mm
 
 ndim = 3
-
 
 gmsh.initialize()
 gmsh.model.add("panel")

@@ -18,3 +18,8 @@ c: 12.0
 b: 4.0
 a: 35.0
 h: 50.0
+mesh_size_in_cell: 12
+mesh_size_out_cell: 3
+mounting_area_shape: square
+mounting_area_size: 10
+mounting_location: 0.3
