@@ -34,7 +34,7 @@ Executing PVmesh can be done through the GUI or using CLI.
 The GUI can be executed by executing
 
 ```
-python guipytk.py.py 
+python pvmesh/guipytk.py.py 
 ```
 
 The GUI should appear as a pop-up window. 
@@ -61,7 +61,7 @@ This file needs to follow the same structure as `original.txt`.
 The mesh generator can then be executed using 
 
 ```
-python mesh_generator.py
+python pvmesh/mesh_generator.py
 ```
 
 
@@ -69,6 +69,14 @@ python mesh_generator.py
 mesh_generator.py is the file that creates the geometry and mesh using GMSH. 
 It reads all variables from input.txt (created by the GUI).  
 In the case where input.txt is not available, mesh_generator.py will use original.txt to set the variables.
+
+### Creation of multiple meshes 
+
+PVmesh allows the creation of multiple meshes by taking comma separated values. 
+For example, if I am conducting a parametric study on the impact of cell_width and require meshes with `cell_width = [3,4,5]`, the variable `cell_width` can take 3,4,5 and will generate 3 input files for each case, then generate a mesh for each file. 
+a subdirectory is created for each case containing the input file the `.brep` geometry file and the mesh file.
+All variables can take comma seprated values, where the the combinations are sorted and the necessary input files are generated.
+
 
 
 
@@ -104,7 +112,13 @@ The variables that control the geometry of the panel are the following:
 - frame_thick:  thickness of frame (`t`)
 
 
+### panel mounting
 
+- mesh_size_in_cell
+- mesh_size_out_cell
+- mounting_area_shape
+- mounting_area_size
+- mounting_location
 
 
 ### Panel Geometry
