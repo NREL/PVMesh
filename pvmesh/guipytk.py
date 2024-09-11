@@ -78,7 +78,7 @@ class MyApp(QWidget):
         self.executeButton = QPushButton("Generate mesh")
         self.executeButton.clicked.connect(self.executeScript)
         rightLayout.addWidget(self.executeButton)
-        
+
 
         # Text area for output
         self.outputText = QTextEdit()
@@ -166,20 +166,20 @@ class MyApp(QWidget):
         for entry in os.listdir(directory):
             # Construct the full path
             full_path = os.path.join(directory, entry)
-            
+
             # Check if the entry is a directory and starts with the prefix
             if os.path.isdir(full_path) and entry.startswith(prefix):
                 print(f"Found directory: {full_path}")
                 for filename in os.listdir(full_path):
                     file_path = os.path.join(full_path, filename)
                     print("generating mesh for ", filename)
-                    command = ['mpirun', '-n', '1', 'python', script_path, file_path, os.path.basename(full_path)]
+                    command = ['python3', script_path, file_path, os.path.basename(full_path)]
                     self.process.start(command[0], command[1:])
                     # Create an event loop to wait for the process to finish
                     loop = QEventLoop()
                     self.process.finished.connect(loop.quit)
                     loop.exec_()  # Start the event loop and wait for the process to finish
-                
+
 
         # for filename in os.listdir(resource_path('combinations')):
         #     # Construct the full file path
@@ -205,11 +205,11 @@ class MyApp(QWidget):
                 text = self.inputFields[var].text()
                 if text:
                     values[var] = text.split(',')  # Split by comma to get different values
-            
+
             # Generate all combinations
             all_combinations = list(itertools.product(*values.values()))
 
-            
+
             for i, combo in enumerate(all_combinations):
                 # Write each combination to a separate file
                 output_dir = resource_path(f'input{i + 1}')
@@ -234,7 +234,7 @@ class MyApp(QWidget):
         #     self.process.start(command[0], command[1:])
 
 
-        
+
 
     def handle_stdout(self):
         # Append standard output to the output text box
