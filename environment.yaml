@@ -22,6 +22,9 @@ dependencies:
   - pyqt
   - pyqt5-sip 
   - tk
+  - pip:
+    - sphinx-rtd-theme
+    - sphinxcontrib.datatemplates
     #  - pip:
     #    - sphinx-rtd-theme
     #    - sphinxcontrib.datatemplates
