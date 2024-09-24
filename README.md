@@ -11,6 +11,11 @@ Among the file formats that can be generated with PVmesh we have:
 - `.vtk`for FEnics/FEniCSx 
 - `.inp`for ABAQUS 
 
+For more information, visit the [PVMesh Documentation](https://pvmesh.readthedocs.io/en/latest/index.html).
+
+[![test_pvade](https://github.com/NREL/PVmesh/actions/workflows/test_pvmesh.yaml/badge.svg)](https://github.com/NREL/PVMesh/actions/workflows/test_pvmesh.yaml)
+[![Documentation Status](https://readthedocs.org/projects/pvmesh/badge/?version=latest)](https://pvmesh.readthedocs.io/en/latest/?badge=latest)
+
 
 ## Getting Started 
 
