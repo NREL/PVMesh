@@ -142,3 +142,91 @@ Adaptive mesh refinement is used to reduce mesh density where its not needed.
 
 
 refrences 
+
+```bash
+@misc{duramat,
+    key = {duramat},
+    note = {https://www.duramat.org/about}
+}
+
+@article{hartley2023analyzing,
+  title={Analyzing photovoltaic module mechanics using composite plate theories and finite element solutions},
+  author={Hartley, James Y and Khraishi, Tariq},
+  journal={Journal of Composite Materials},
+  volume={57},
+  number={22},
+  pages={3573--3583},
+  year={2023},
+  publisher={SAGE Publications Sage UK: London, England}
+}
+
+@techreport{he2018finite,
+  title={Finite element simulation of mixed-mode PV encapsulant delamination based on cohesive zone model},
+  author={He, Xin and Bosco, Nicholas S},
+  year={2018},
+  institution={National Renewable Energy Lab.(NREL), Golden, CO (United States)}
+}
+
+@techreport{deceglie2023whatscracking,
+  title={WhatsCracking [SWR-23-03]},
+  author={Deceglie, Michael and Bosco, Nicholas and Silverman, Timothy and Springer, Martin},
+  year={2023},
+  institution={National Renewable Energy Laboratory (NREL), Golden, CO (United States)}
+}
+
+@article{young2020fluid,
+  title={A fluid-structure interaction solver for investigating torsional galloping in solar-tracking photovoltaic panel arrays},
+  author={Young, Ethan and He, Xin and King, Ryan and Corbus, David},
+  journal={Journal of Renewable and Sustainable Energy},
+  volume={12},
+  number={6},
+  year={2020},
+  publisher={AIP Publishing}
+}
+
+@article{bosco2020viscoelastic,
+  title={Viscoelastic material characterization and modeling of photovoltaic module packaging materials for direct finite-element method input},
+  author={Bosco, Nick and Springer, Martin and He, Xin},
+  journal={IEEE Journal of Photovoltaics},
+  volume={10},
+  number={5},
+  pages={1424--1440},
+  year={2020},
+  publisher={IEEE}
+}
+
+@article{manual2012abaqus,
+  title={Abaqus 6.11},
+  author={Manual, Abaqus Scripting User’s},
+  journal={http://130.149},
+  volume={89},
+  number={2080},
+  pages={v6},
+  year={2012}
+}
+
+@article{manualcomsol62,
+  title={COMSOL 6.2},
+  author={Reference Manual},
+  journal={https://doc.comsol.com/6.2/doc/com.comsol.help.comsol/COMSOL_ReferenceManual.pdf},
+  year={2023}
+}
+
+@article{manualansys2024,
+  title={ANSYS 2024R1},
+  author={User Manual},
+  journal={ANSYS, Inc.},
+  year={2023}
+}
+
+@article{geuzaine2009gmsh,
+  title={Gmsh: A 3-D finite element mesh generator with built-in pre-and post-processing facilities},
+  author={Geuzaine, Christophe and Remacle, Jean-Fran{\c{c}}ois},
+  journal={International journal for numerical methods in engineering},
+  volume={79},
+  number={11},
+  pages={1309--1331},
+  year={2009},
+  publisher={Wiley Online Library}
+}
+```
