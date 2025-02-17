@@ -13,13 +13,13 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../pvade"))
+sys.path.insert(0, os.path.abspath("../pvmesh"))
 
 
 # -- Project information -----------------------------------------------------
 
-project = "PVmesh"
-copyright = "2023, Walid Arsalane, Xin He"
+project = "PVMesh"
+copyright = "2024, Walid Arsalane, Xin He"
 author = "Walid Arsalane, Xin He"
 
 
